@@ -677,25 +677,29 @@ class Driver {
     return this.sendCommand('Runtime.enable');
   }
 
-  beginEmulation(flags) {
+  beginEmulation(options) {
     return Promise.resolve().then(_ => {
-      if (!flags.disableDeviceEmulation) {
+      if (!options.flags.disableDeviceEmulation) {
         return emulation.enableNexus5X(this);
       }
+    }).then(_ => {
+      return this.setThrottling(options.flags, {useThrottling: true});
     });
   }
 
   setThrottling(cliFlags, passConfig) {
-    const emulations = [
-      emulation.disableNetworkThrottling(this),
-      emulation.disableCPUThrottling(this)
-    ];
+    const emulations = [];
 
-    if (!cliFlags.disableNetworkThrottling && passConfig.useThrottling) {
-      emulations.push(emulation.enableNetworkThrottling(this));
+    if (!passConfig.useThrottling) {
+      emulations.push(emulation.disableNetworkThrottling(this));
+      emulations.push(emulation.disableCPUThrottling(this));
+      return Promise.all(emulations);
     }
 
-    if (!cliFlags.disableCpuThrottling && passConfig.useThrottling) {
+    if (!cliFlags.disableNetworkThrottling) {
+      emulations.push(emulation.enableNetworkThrottling(this));
+    }
+    if (!cliFlags.disableCpuThrottling) {
       emulations.push(emulation.enableCPUThrottling(this));
     }
     return Promise.all(emulations);

@@ -106,6 +106,7 @@ class GatherRunner {
   static disposeDriver(driver) {
     // We dont need to hold up the reporting for the reload/disconnect,
     // so we will not return a promise in here.
+    console.trace()
     log.log('status', 'Disconnecting from browser...');
     driver.disconnect().catch(err => {
       // Ignore disconnecting error if browser was already closed.

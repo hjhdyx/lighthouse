@@ -41,23 +41,70 @@ class CriConnection extends Connection {
    * @return {!Promise}
    */
   connect() {
-    return this._runJsonCommand('new').then(response => {
-      const url = response.webSocketDebuggerUrl;
-      this._pageId = response.id;
+    return this._runJsonCommand('new')
+        .then(response => this._connectToSocket(response), this.newTabFallback.bind(this));
+  }
 
-      return new Promise((resolve, reject) => {
-        const ws = new WebSocket(url, {
-          perMessageDeflate: false
-        });
-        ws.on('open', () => {
-          this._ws = ws;
-          resolve();
-        });
-        ws.on('message', data => this.handleRawMessage(data));
-        ws.on('close', this.dispose.bind(this));
-        ws.on('error', reject);
+  _connectToSocket(response) {
+    log.log('lo', response)
+    const url = response.webSocketDebuggerUrl;
+    this._pageId = response.id;
+
+    return new Promise((resolve, reject) => {
+      const ws = new WebSocket(url, {
+        perMessageDeflate: false
       });
+      ws.on('open', () => {
+        this._ws = ws;
+        resolve();
+      });
+      ws.on('message', data => this.handleRawMessage(data));
+      ws.on('close', this.dispose.bind(this));
+      ws.on('error', reject);
     });
+  }
+
+  // called if /json/new fails (e.g. in headless)
+  newTabFallback() {
+    // const createTargetMsg = JSON.stringify({
+    //   id: 1,
+    //   method: 'Target.createTarget',
+    //   params: {url: 'about:blank'}
+    // });
+    let webSocketDebuggerUrl;
+    let id;
+    let targetData;
+
+    return this._runJsonCommand('list')
+      // hold on to id and ws URL of
+      .then(tabs => ({webSocketDebuggerUrl, id} = tabs[0]))
+      .then(tab => this._connectToSocket(tab))
+
+      .then(_ => this.sendCommand('Target.closeTarget', {targetId: id}))
+
+
+//       .then(_ => this.sendCommand('Target.createTarget', {url: 'about:blank'}))
+//       .then(target => {
+//       targetData = target;
+//       })
+//       .then(_ => this._runJsonCommand('list'))
+// //       .then(x => log.log('hi', x) || x)
+//       .then(_ => this.sendCommand('Target.getTargetInfo', targetData))
+      .then(data => {
+        const targetInfo = data.targetInfo;
+        const newId = targetInfo.targetId;
+        const newWSURL = webSocketDebuggerUrl.replace(id, newId);
+        log.log('uh', data);
+
+        return this.disconnect().then(_ => {
+          const newTabResponse = {
+            id: targetInfo.targetId,
+            webSocketDebuggerUrl: newWSURL
+          };
+          // log.log('connecting to new', newTabResponse)
+          // return this._connectToSocket(newTabResponse);
+        }).catch(e => log.error('ruh', e))
+      });
   }
 
   /**

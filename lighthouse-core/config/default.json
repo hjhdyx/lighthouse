@@ -77,14 +77,47 @@
     "theme-color-meta",
     "content-width",
     "deprecations",
+    "accessibility/accesskeys",
+    "accessibility/area-alt",
     "accessibility/aria-allowed-attr",
     "accessibility/aria-required-attr",
+    "accessibility/aria-required-children",
+    "accessibility/aria-required-parent",
+    "accessibility/aria-roles",
     "accessibility/aria-valid-attr-value",
     "accessibility/aria-valid-attr",
+    "accessibility/audio-caption",
+    "accessibility/blink",
+    "accessibility/button-name",
+    "accessibility/bypass",
     "accessibility/color-contrast",
+    "accessibility/definition-list",
+    "accessibility/dlitem",
+    "accessibility/document-title",
+    "accessibility/duplicate-id",
+    "accessibility/frame-title",
+    "accessibility/html-has-lang",
+    "accessibility/html-lang-valid",
     "accessibility/image-alt",
+    "accessibility/input-image-alt",
     "accessibility/label",
+    "accessibility/layout-table",
+    "accessibility/link-name",
+    "accessibility/list",
+    "accessibility/listitem",
+    "accessibility/marquee",
+    "accessibility/meta-refresh",
+    "accessibility/meta-viewport",
+    "accessibility/object-alt",
+    "accessibility/server-side-image-map",
     "accessibility/tabindex",
+    "accessibility/table-fake-caption",
+    "accessibility/td-has-header",
+    "accessibility/td-headers-attr",
+    "accessibility/th-has-data-cells",
+    "accessibility/valid-lang",
+    "accessibility/video-caption",
+    "accessibility/video-description",
     "byte-efficiency/unused-css-rules",
     "byte-efficiency/uses-optimized-images",
     "byte-efficiency/uses-responsive-images",
@@ -354,6 +387,14 @@
     }, {
       "name": "Accessibility",
       "audits": {
+        "accesskeys": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "area-alt": {
+          "expectedValue": true,
+          "weight": 1
+        },
         "aria-allowed-attr": {
           "expectedValue": true,
           "weight": 1
@@ -362,7 +403,15 @@
           "expectedValue": true,
           "weight": 1
         },
-        "aria-valid-attr": {
+        "aria-required-children": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "aria-required-parent": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "aria-roles": {
           "expectedValue": true,
           "weight": 1
         },
@@ -370,7 +419,55 @@
           "expectedValue": true,
           "weight": 1
         },
+        "aria-valid-attr": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "audio-caption": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "blink": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "button-name": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "bypass": {
+          "expectedValue": true,
+          "weight": 1
+        },
         "color-contrast": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "definition-list": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "dlitem": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "document-title": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "duplicate-id": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "frame-title": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "html-has-lang": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "html-lang-valid": {
           "expectedValue": true,
           "weight": 1
         },
@@ -378,11 +475,79 @@
           "expectedValue": true,
           "weight": 1
         },
+        "input-image-alt": {
+          "expectedValue": true,
+          "weight": 1
+        },
         "label": {
           "expectedValue": true,
           "weight": 1
         },
+        "layout-table": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "link-name": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "list": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "listitem": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "marquee": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "meta-refresh": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "meta-viewport": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "object-alt": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "server-side-image-map": {
+          "expectedValue": true,
+          "weight": 1
+        },
         "tabindex": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "table-fake-caption": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "td-has-header": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "td-headers-attr": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "th-has-data-cells": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "valid-lang": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "video-caption": {
+          "expectedValue": true,
+          "weight": 1
+        },
+        "video-description": {
           "expectedValue": true,
           "weight": 1
         }

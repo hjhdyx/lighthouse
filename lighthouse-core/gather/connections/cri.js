@@ -51,11 +51,17 @@ class CriConnection extends Connection {
           if (!Array.isArray(tabs) || !firstTab) {
             return Promise.reject(new Error('Cannot create new tab, and no tabs already open.'));
           }
-          return this._connectToSocket(firstTab);
+          // first, we activate it to a foreground tab, then we connect
+          return this._runJsonCommand(`activate/${firstTab.id}`)
+              .then(_ => this._connectToSocket(firstTab));
         });
       });
   }
 
+  /**
+   * @param {!Object} response
+   * @return {!Promise}
+   */
   _connectToSocket(response) {
     const url = response.webSocketDebuggerUrl;
     this._pageId = response.id;
@@ -95,8 +101,8 @@ class CriConnection extends Connection {
               resolve(JSON.parse(data));
               return;
             } catch (e) {
-              // In the case of 'close' Chromium returns a string rather than JSON: goo.gl/7v27xD
-              if (data === 'Target is closing') {
+              // In the case of 'close' & 'activate' Chromium returns a string rather than JSON: goo.gl/7v27xD
+              if (data === 'Target is closing' || data === 'Target activated') {
                 return resolve({message: data});
               }
               return reject(e);

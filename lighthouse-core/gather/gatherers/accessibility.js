@@ -36,6 +36,9 @@ function runA11yChecks() {
         'wcag2a',
         'wcag2aa'
       ]
+    },
+    rules: {
+      'tabindex': {enabled: true}
     }
   });
 }

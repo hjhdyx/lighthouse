@@ -79,17 +79,12 @@ class CriConnection extends Connection {
       // hold on to id and ws URL of
       .then(tabs => ({webSocketDebuggerUrl, id} = tabs[0]))
       .then(tab => this._connectToSocket(tab))
-
-      .then(_ => this.sendCommand('Target.closeTarget', {targetId: id}))
-
-
-//       .then(_ => this.sendCommand('Target.createTarget', {url: 'about:blank'}))
-//       .then(target => {
-//       targetData = target;
-//       })
-//       .then(_ => this._runJsonCommand('list'))
-// //       .then(x => log.log('hi', x) || x)
-//       .then(_ => this.sendCommand('Target.getTargetInfo', targetData))
+      .then(_ => this.sendCommand('Target.createTarget', {url: 'about:blank'}))
+      .then(target => {
+        targetData = target;
+      })
+      .then(_ => this._runJsonCommand('list'))
+      .then(_ => this.sendCommand('Target.getTargetInfo', targetData))
       .then(data => {
         const targetInfo = data.targetInfo;
         const newId = targetInfo.targetId;

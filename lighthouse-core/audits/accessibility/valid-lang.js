@@ -18,27 +18,26 @@
 'use strict';
 
 /**
- * @fileoverview Ensure that tables with a caption use the `<caption>` element.
+ * @fileoverview Ensures lang attributes have valid values.
  * See base class in axe-audit.js for audit() implementation.
  */
 
 const AxeAudit = require('./axe-audit');
 
-class TableFakeCaption extends AxeAudit {
+class ValidLang extends AxeAudit {
   /**
    * @return {!AuditMeta}
    */
   static get meta() {
     return {
       category: 'Accessibility',
-      name: 'table-fake-caption',
-      description: 'Data tables do not use a colspan to visually indicate a caption.',
-      helpText: 'Screen readers have features to specifically call out captions in data tables.' +
-          'If a `colspan` is used instead of a `<caption>` element, screen reader users may miss' +
-          'out on these features.',
+      name: 'valid-lang',
+      description: 'All elements using the `lang=""` attribute have a valid value.',
+      helpText: 'Specifying a valid language helps ensure that text is pronounced correctly by a' +
+          'screen reader.',
       requiredArtifacts: ['Accessibility']
     };
   }
 }
 
-module.exports = TableFakeCaption;
+module.exports = ValidLang;

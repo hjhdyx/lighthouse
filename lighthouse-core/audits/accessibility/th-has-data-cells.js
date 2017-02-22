@@ -18,27 +18,28 @@
 'use strict';
 
 /**
- * @fileoverview Ensure that tables with a caption use the `<caption>` element.
+ * @fileoverview Ensure that each table header in a data table refers to data cells.
  * See base class in axe-audit.js for audit() implementation.
  */
 
 const AxeAudit = require('./axe-audit');
 
-class TableFakeCaption extends AxeAudit {
+class THHasDataCells extends AxeAudit {
   /**
    * @return {!AuditMeta}
    */
   static get meta() {
     return {
       category: 'Accessibility',
-      name: 'table-fake-caption',
-      description: 'Data tables do not use a colspan to visually indicate a caption.',
-      helpText: 'Screen readers have features to specifically call out captions in data tables.' +
-          'If a `colspan` is used instead of a `<caption>` element, screen reader users may miss' +
-          'out on these features.',
+      name: 'th-has-data-cells',
+      description: 'All `<th>` elements and elements with `role=columnheader/rowheader` have data' +
+          'cells they describe',
+      helpText: 'Screen readers have features to make navigating tables easier. Ensuring table' +
+          'headers always refer to some set of cells may improve the experience for screen' +
+          'reader users.',
       requiredArtifacts: ['Accessibility']
     };
   }
 }
 
-module.exports = TableFakeCaption;
+module.exports = THHasDataCells;

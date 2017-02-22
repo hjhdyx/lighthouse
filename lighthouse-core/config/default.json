@@ -85,6 +85,7 @@
     "accessibility/image-alt",
     "accessibility/label",
     "accessibility/tabindex",
+    "byte-efficiency/total-byte-weight",
     "byte-efficiency/unused-css-rules",
     "byte-efficiency/uses-optimized-images",
     "byte-efficiency/uses-responsive-images",
@@ -282,6 +283,10 @@
     }, {
       "name": "Using bytes efficiently",
       "audits": {
+        "total-byte-weight": {
+          "expectedValue": true,
+          "weight": 1
+        },
         "unused-css-rules": {
           "expectedValue": true,
           "weight": 1

@@ -16,17 +16,17 @@
  */
 'use strict';
 
-const Audit = require('../../../audits/accessibility/list-item.js');
+const Audit = require('../../../audits/accessibility/listitem.js');
 const assert = require('assert');
 
 /* eslint-env mocha */
 
-describe('Accessibility: list-item audit', () => {
+describe('Accessibility: listitem audit', () => {
   it('generates an audit output', () => {
     const artifacts = {
       Accessibility: {
         violations: [{
-          id: 'list-item',
+          id: 'listitem',
           nodes: [],
           help: 'http://example.com/'
         }]
@@ -42,7 +42,7 @@ describe('Accessibility: list-item audit', () => {
     const artifacts = {
       Accessibility: {
         violations: [{
-          id: 'list-item',
+          id: 'listitem',
           nodes: [{}],
           help: 'http://example.com/'
         }]

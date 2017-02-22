@@ -35,7 +35,7 @@ class Marquee extends AxeAudit {
       description: 'The deprecated `<marquee>` element is not used on the page.',
       helpText: 'Because they create scrolling text, `<marquee>` elements may be difficult to' +
           'read or click on. They may also be distracting for users with cognitive or' +
-          'attention deficits.'
+          'attention deficits.',
       requiredArtifacts: ['Accessibility']
     };
   }

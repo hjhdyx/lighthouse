@@ -42,11 +42,21 @@ class CriConnection extends Connection {
    */
   connect() {
     return this._runJsonCommand('new')
-        .then(response => this._connectToSocket(response), this.newTabFallback.bind(this));
+      .then(response => this._connectToSocket(response))
+      .catch(_ => {
+        // headless doesn't support `/json/new` (#970), so we fallback to reuse
+        log.warn('CriConnection', 'Cannot create new tab; reusing open tab.');
+        return this._runJsonCommand('list').then(tabs => {
+          const firstTab = tabs[0];
+          if (!Array.isArray(tabs) || !firstTab) {
+            return Promise.reject(new Error('Cannot create new tab, and no tabs already open.'));
+          }
+          return this._connectToSocket(firstTab);
+        });
+      });
   }
 
   _connectToSocket(response) {
-    log.log('lo', response)
     const url = response.webSocketDebuggerUrl;
     this._pageId = response.id;
 
@@ -62,44 +72,6 @@ class CriConnection extends Connection {
       ws.on('close', this.dispose.bind(this));
       ws.on('error', reject);
     });
-  }
-
-  // called if /json/new fails (e.g. in headless)
-  newTabFallback() {
-    // const createTargetMsg = JSON.stringify({
-    //   id: 1,
-    //   method: 'Target.createTarget',
-    //   params: {url: 'about:blank'}
-    // });
-    let webSocketDebuggerUrl;
-    let id;
-    let targetData;
-
-    return this._runJsonCommand('list')
-      // hold on to id and ws URL of
-      .then(tabs => ({webSocketDebuggerUrl, id} = tabs[0]))
-      .then(tab => this._connectToSocket(tab))
-      .then(_ => this.sendCommand('Target.createTarget', {url: 'about:blank'}))
-      .then(target => {
-        targetData = target;
-      })
-      .then(_ => this._runJsonCommand('list'))
-      .then(_ => this.sendCommand('Target.getTargetInfo', targetData))
-      .then(data => {
-        const targetInfo = data.targetInfo;
-        const newId = targetInfo.targetId;
-        const newWSURL = webSocketDebuggerUrl.replace(id, newId);
-        log.log('uh', data);
-
-        return this.disconnect().then(_ => {
-          const newTabResponse = {
-            id: targetInfo.targetId,
-            webSocketDebuggerUrl: newWSURL
-          };
-          // log.log('connecting to new', newTabResponse)
-          // return this._connectToSocket(newTabResponse);
-        }).catch(e => log.error('ruh', e))
-      });
   }
 
   /**

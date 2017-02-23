@@ -20,10 +20,15 @@
 'use strict';
 
 const Audit = require('./byte-efficiency-audit');
+const Formatter = require('../../formatters/formatter');
+const TracingProcessor = require('../../lib/traces/tracing-processor');
 const URL = require('../../lib/url-shim');
 
-// ~95th percentile http://httparchive.org/interesting.php?a=All&l=Feb%201%202017&s=All#bytesTotal
-const FAILURE_THRESHOLD_IN_BYTES = 5 * 1024 * 1024; // 5MB
+// Parameters for log-normal CDF scoring. See https://www.desmos.com/calculator/gpmjeykbwr
+// ~75th and ~90th percentiles http://httparchive.org/interesting.php?a=All&l=Feb%201%202017&s=All#bytesTotal
+const OPTIMAL_VALUE = 1600 * 1024;
+const SCORING_POINT_OF_DIMINISHING_RETURNS = 2500 * 1024;
+const SCORING_MEDIAN = 4000 * 1024;
 
 class TotalByteWeight extends Audit {
   /**
@@ -33,9 +38,11 @@ class TotalByteWeight extends Audit {
     return {
       category: 'Network',
       name: 'total-byte-weight',
+      optimalValue: this.bytesToKbString(OPTIMAL_VALUE),
       description: 'Avoids enormous network payloads',
       helpText:
-          'Network transfer size is [highly correlated](http://httparchive.org/interesting.php?a=All&l=Feb%201%202017&s=All#onLoad) with long load times. ' +
+          'Network transfer size [costs users real dollars](https://whatdoesmysitecost.com/) ' +
+          'and is [highly correlated](http://httparchive.org/interesting.php#onLoad) with long load times. ' +
           'Try to find ways to reduce the size of required files.',
       requiredArtifacts: ['networkRecords']
     };
@@ -43,39 +50,57 @@ class TotalByteWeight extends Audit {
 
   /**
    * @param {!Artifacts} artifacts
-   * @param {!Array<WebInspector.NetworkRequest>} networkRecords
-   * @return {{results: !Array<Object>, tableHeadings: Object,
-   *     passes: boolean=, debugString: string=}}
+   * @return {!Promise<!AuditResult>}
    */
-  static audit_(artifacts, networkRecords) {
-    let totalBytes = 0;
-    const results = networkRecords.reduce((prev, record) => {
-      // exclude data URIs since their size is reflected in other resources
-      if (record.scheme === 'data') {
+  static audit(artifacts) {
+    const networkRecords = artifacts.networkRecords[Audit.DEFAULT_PASS];
+    return artifacts.requestNetworkThroughput(networkRecords).then(networkThroughput => {
+      let totalBytes = 0;
+      const results = networkRecords.reduce((prev, record) => {
+        // exclude data URIs since their size is reflected in other resources
+        if (record.scheme === 'data') {
+          return prev;
+        }
+
+        const result = {
+          url: URL.getDisplayName(record.url),
+          totalBytes: record.transferSize,
+          totalKb: this.bytesToKbString(record.transferSize),
+          totalMs: this.bytesToMsString(record.transferSize, networkThroughput),
+        };
+
+        totalBytes += result.totalBytes;
+        prev.push(result);
         return prev;
-      }
+      }, []).sort((itemA, itemB) => itemB.totalBytes - itemA.totalBytes).slice(0, 10);
 
-      const result = {
-        url: URL.getDisplayName(record.url),
-        wastedBytes: 0,
-        totalBytes: record.transferSize,
-      };
 
-      totalBytes += result.totalBytes;
-      prev.push(result);
-      return prev;
-    }, []).sort((itemA, itemB) => itemB.totalBytes - itemA.totalBytes).slice(0, 10);
+      // Use the CDF of a log-normal distribution for scoring.
+      //   <= 1600KB: score≈100
+      //   4000KB: score=50
+      //   >= 9000KB: score≈0
+      const distribution = TracingProcessor.getLogNormalDistribution(
+          SCORING_MEDIAN, SCORING_POINT_OF_DIMINISHING_RETURNS);
+      const score = 100 * distribution.computeComplementaryPercentile(totalBytes);
 
-    return {
-      displayValue: `Total size was ${Audit.bytesToKbString(totalBytes)}`,
-      passes: totalBytes < FAILURE_THRESHOLD_IN_BYTES,
-      results,
-      tableHeadings: {
-        url: 'URL',
-        totalKb: 'Total Size',
-        totalMs: 'Transfer Time',
-      }
-    };
+      return this.generateAuditResult({
+        rawValue: totalBytes,
+        optimalValue: this.meta.optimalValue,
+        displayValue: `Total size was ${Audit.bytesToKbString(totalBytes)}`,
+        score: Math.round(Math.max(0, Math.min(score, 100))),
+        extendedInfo: {
+          formatter: Formatter.SUPPORTED_FORMATS.TABLE,
+          value: {
+            results,
+            tableHeadings: {
+              url: 'URL',
+              totalKb: 'Total Size',
+              totalMs: 'Transfer Time',
+            }
+          }
+        }
+      });
+    });
   }
 }
 
